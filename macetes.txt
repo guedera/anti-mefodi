@@ -4,3 +4,10 @@ ros2 run rqt_image_view rqt_image_view
 
 ros2 pkg create --build-type ament_python my_package --dependencies rclpy std_msgs geometry_msgs robcomp_util
 
+ros2 run turtlebot3_teleop teleop_keyboard
+
+ros2 topic list
+
+ros2 topic echo algumacoisa
+
+chmod +x *.py
