@@ -2,7 +2,7 @@ ros2 launch my_gazebo pista-23B.launch.py
 
 ros2 run rqt_image_view rqt_image_view
 
-ros2 pkg create --build-type ament_python my_package --dependencies rclpy std_msgs geometry_msgs robcomp_util
+ros2 pkg create --build-type ament_python pacote_simulado --dependencies rclpy std_msgs geometry_msgs robcomp_util
 
 ros2 run turtlebot3_teleop teleop_keyboard
 
