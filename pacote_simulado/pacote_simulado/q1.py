@@ -5,6 +5,7 @@ from geometry_msgs.msg import Twist
 from pacote_simulado.laser import Laser
 from pacote_simulado.odom import Odom
 import numpy as np
+from std_msgs.msg import String
 # Adicione aqui os imports necessários
 
 class Fugitivo(Node,Laser,Odom): # Mude o nome da classe
@@ -25,6 +26,11 @@ class Fugitivo(Node,Laser,Odom): # Mude o nome da classe
         # Inicialização de variáveis
         self.twist = Twist()
         self.robot_state = 'segue'
+        self.string_msg = String()
+        self.string_msg.data = 'start'
+
+        self.situ = False
+
         #variaveis inicializadas no laser e no odom
 
         # Subscribers
@@ -35,9 +41,12 @@ class Fugitivo(Node,Laser,Odom): # Mude o nome da classe
         # Publishers
         ## Coloque aqui os publishers
         self.cmd_vel_pub = self.create_publisher(Twist, 'cmd_vel', 10)
+        self.watcher_pub = self.create_publisher(String, 'watcher', 10)
+        self.watcher_pub.publish(self.string_msg)
 
     def para(self):
-        return
+        self.string_msg.data = 'stop'
+        self.watcher_pub.publish(self.string_msg)
     
     def ajusta(self):
         erro = self.goal_yaw - self.yaw
@@ -54,32 +63,68 @@ class Fugitivo(Node,Laser,Odom): # Mude o nome da classe
 
     
     def segue(self):
-        self.twist.linear.x = 0.45
 
-        #psaiu
-        if (np.min(self.front) > 2) and (np.min(self.left) > 1) and (np.min(self.right) > 1):
-            self.robot_state = 'para'
+        if self.situ == False:
+            if self.x < 0:
+                self.situ = 0
+            else:
+                self.situ = 1
 
-        #parede na frente
-        if np.min(self.front) < 0.6:
+        if self.situ == 0:
+            self.twist.linear.x = 0.45
 
-            #parede na esquerda
-            if (np.min(self.right) > 0.7) and (np.min(self.left) < 0.7):
-                self.goal_yaw = self.yaw - np.pi/2
+            #psaiu
+            if (np.min(self.front) > 2) and (np.min(self.left) > 1) and (np.min(self.right) > 1):
+                self.robot_state = 'para'
 
-            #parede na direita
-            if(np.min(self.right) < 0.7) and (np.min(self.left) > 0.7):
-                self.goal_yaw = self.yaw + np.pi/2
+            #parede na frente
+            if np.min(self.front) < 0.6:
 
-            #deadand
-            if (np.min(self.right) < 0.7) and (np.min(self.left) < 0.7):
-                self.goal_yaw = self.yaw + np.pi
-            
-            #só tem parede na frente
-            if (np.min(self.right) > 0.7) and (np.min(self.left) > 0.7):
-                self.goal_yaw = self.yaw + np.pi/2
+                #parede na esquerda
+                if (np.min(self.right) > 0.7) and (np.min(self.left) < 0.7):
+                    self.goal_yaw = self.yaw - np.pi/2
+
+                #parede na direita
+                if(np.min(self.right) < 0.7) and (np.min(self.left) > 0.7):
+                    self.goal_yaw = self.yaw + np.pi/2
+
+                #deadand
+                if (np.min(self.right) < 0.7) and (np.min(self.left) < 0.7):
+                    self.goal_yaw = self.yaw + np.pi
                 
-            self.robot_state = 'ajusta'
+                #só tem parede na frente
+                if (np.min(self.right) > 0.7) and (np.min(self.left) > 0.7):
+                    self.goal_yaw = self.yaw + np.pi/2
+                    
+                self.robot_state = 'ajusta'
+
+        else:                
+                self.twist.linear.x = 0.45
+
+                #psaiu
+                if (np.min(self.front) > 2) and (np.min(self.left) > 1) and (np.min(self.right) > 1):
+                    self.robot_state = 'para'
+
+                #parede na frente
+                if np.min(self.front) < 0.6:
+
+                    #parede na esquerda
+                    if (np.min(self.right) > 0.7) and (np.min(self.left) < 0.7):
+                        self.goal_yaw = self.yaw - np.pi/2
+
+                    #parede na direita
+                    if(np.min(self.right) < 0.7) and (np.min(self.left) > 0.7):
+                        self.goal_yaw = self.yaw + np.pi/2
+
+                    #deadand
+                    if (np.min(self.right) < 0.7) and (np.min(self.left) < 0.7):
+                        self.goal_yaw = self.yaw + np.pi
+                    
+                    #só tem parede na frente
+                    if (np.min(self.right) > 0.7) and (np.min(self.left) > 0.7):
+                        self.goal_yaw = self.yaw - np.pi/2
+                        
+                    self.robot_state = 'ajusta'
         
     def control(self):
         self.twist = Twist()
