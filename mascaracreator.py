@@ -43,5 +43,5 @@ def calcular_mascara_hsv(rgb):
     print("Máscara HSV superior:", mascara_superior)
 
 # Exemplo com a entrada fornecida
-rgb_cor = (200, 205, 105)
+rgb_cor = (250, 100, 1)
 calcular_mascara_hsv(rgb_cor)
